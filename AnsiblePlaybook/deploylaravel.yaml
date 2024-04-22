@@ -1,0 +1,31 @@
+---
+- name: Deoloy Laravel application and automate the cron job
+  hosts: slave 
+  become: yes
+
+  tasks:
+  - name: Copy deploy script to slave node
+    copy:
+      src: /home/Bashscript/lampstack.sh
+      dest: /tmp/lampstack.sh
+      mode: 0755
+    register: copy_lampstack_script
+
+  - name: Print the copy script outpu
+    debug:
+      var: copy_lampstack_script
+
+  - name: Execute the deploy script to deploy Laravel app
+    shell: /tmp/lampstack.sh https://github.com/yourusername/yourrepository.git
+    register: deploy_output 
+
+  - name: Execute the deploy script deploy_output
+    debug: 
+      var: deploy_output
+    
+  - name: Copy the cron job to check server's uptime everyday at 12 am
+    cron:
+      name: Check Server uptime
+      minute: 0
+      hour: 0
+      job: uptime > /tmp/uptime.txt
